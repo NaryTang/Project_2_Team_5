@@ -14,14 +14,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.7.1/d3-tip.min.js"></script>
 
-
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+    <!-- Bootstrap CSS & JS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
         crossorigin="anonymous">
-
-    <!-- Optional theme -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp"
-        crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
 
     <!-- CSS stylesheet -->
     <link rel="stylesheet" href="{{url_for('static',filename='css/style.css')}}">
@@ -29,26 +30,70 @@
 </head>
 
 <body>
-
+  <!-- Nav Bar -->
+  <div class="navigation">
+        <nav class="navbar navbar-expand-sm bg-light navbar-light">
+                <ul class="navbar-nav">
+                  <li class="nav-item active">
+                    <a class="nav-link" href="/">Home</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="/map">Map</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="/table">Table</a>
+                  </li>
+                </ul>
+              </nav>
+      </div>
+      <!-- Container Grid -->
     <div class="container">
         <div class="row">
-            <div class="col-md-8 col-md-offset-2">
+            <div class="col-md-10 col-md-offset-2">
                 <h1>Homeless Rates vs Economic Demograpics</h1>
+                <h3><b>A comparrison of 2017 metrics</b></h3>
 
-                <p>Placeholder text </p>
+                <p>Our analysis begins with a look at homeless population rates and total volume against economic factors that can heavily impact a living
+                    situation. We start with a look at <b>Median Household Income</b>, which is utilized to identify the number of households that fall
+                    under the poverty line. This information is used to calculate the <b>Poverty Rate</b> for each state, which tells us the concentrated
+                    percentage of people who are considered to be living in poverty. With our last economic factor, we selected state <b>Unemployment Rates</b>
+                    to provide depiction of how the strength of the labor force might affect the rate of homelessness.
+
+                </p>
+                <hr>
             </div>
 
 
             <div class="col-md-10 col-md-offset-1">
-                <hr>
                 <div class="chart">
                 </div>
 
-                <hr>
             </div>
 
-            <div class="col-md-8 col-md-offset-2">
-                <p>Placeholder text</p>
+            <div class="col-md-11 col-md-offset-3">
+                <hr>
+                <h3><b>What did we find?</b></h3>
+                <p>We came to several conclusion with our initial analysis:
+                    <ul>
+                        <li>
+                            Despite having the highest median household income, Washington DC holds the highest concentration of homeless individuals within their population at 1.07%.
+                            With such a high median income, more households are likely to fall under the poverty line, which hold just under 17% of their total population. This
+                            is also compounded by their unemployment rate of 6.1%, which is the second highest in the nation.
+                        </li>
+                        <br>
+                        <li>
+                            Conversely, New Hampsire is on the opposite end of the homeless population spectrum. With the lowest poverty rate in the nation and a rate of unemployment
+                            second only to Hawaii, we can use these economic indicators to establish New Hampshire as the state with the lowest homeless population rate in the 
+                            United States.
+                        </li>
+                        <br>
+                        <li>
+                            One anomoly we uncovered throughout this analysis were the metrics related to Hawaii. Although the state boasts the lowest rate of unemployment in the nation
+                            and one of the lowest poverty rates, they hold the second highest concentration of homeless individuals within their population with a rate of 0.51%.
+                        </li>
+
+                    </ul>
+                </p>
 
 
             </div>
@@ -58,7 +103,7 @@
 
     </div>
 
-
+    <!-- Insert Javascript File Link Here -->
     <script src="{{url_for('static',filename='js/app.js')}}"></script>
 
 </body>

@@ -36,7 +36,7 @@ d3.json(url, function (err, data) {
         .offset([0, 50])
         .html(function (data) {
             var state = data.NAME;
-            return (`${data.NAME}<br>Total Homeless: ${data.homeless}<br>Median Income: $${data.median_income}<br>Poverty Rate: ${data.poverty_rate}%<br>Unemployment Rate: ${data.unemployment_rate}% `);
+            return (`${data.NAME}<br>Homeless Population: ${data.homeless}<br>Median Income: $${data.median_income}<br>Poverty Rate: ${data.poverty_rate}%<br>Unemployment Rate: ${data.unemployment_rate}% `);
         });
 
     // call tooltip
@@ -72,7 +72,7 @@ d3.json(url, function (err, data) {
     var defaultAxisLabelX = "median_income"
 
     // set default y-axis
-    var defaultAxisLabelY = "homeless"
+    var defaultAxisLabelY = "homeless_rate"
 
     // call the findMinAndMax() on the default X Axis
     findMinAndMaxX(defaultAxisLabelX)
@@ -180,16 +180,16 @@ d3.json(url, function (err, data) {
 
     // add y-axis titles 
     chart.append("text")
-        .attr("transform", `translate(-65,${height / 2})rotate(270)`)
+        .attr("transform", `translate(-45,${height / 2})rotate(270)`)
         .attr("class", "axis-text-y active")
-        .attr("data-axis-name", "homeless")
-        .text("Total Homeless");
+        .attr("data-axis-name", "homeless_rate")
+        .text("Homeless Rate (%)");
     
     chart.append("text")
-        .attr("transform", `translate(-85,${height / 2})rotate(270)`)
+        .attr("transform", `translate(-65,${height / 2})rotate(270)`)
         .attr("class", "axis-text-y inactive")
-        .attr("data-axis-name", "total_population")
-        .text("Total Population");
+        .attr("data-axis-name", "homeless")
+        .text("Homeless Volume");
 
 
     // change the x axis's status to active when clicked and change other axis titles to inactive

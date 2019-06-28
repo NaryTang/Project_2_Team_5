@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Data Table</title>
+
+    <!-- google fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Barlow+Condensed" rel="stylesheet">
+
+    <!-- d3 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.7.1/d3-tip.min.js"></script>
+
+    <!-- Bootstrap CSS & JS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    <!-- CSS stylesheet -->
+    <link rel="stylesheet" href="{{url_for('static',filename='css/style.css')}}">
+
+</head>
+
+<body>
+  <!-- Nav Bar -->
+  <div class="navigation">
+        <nav class="navbar navbar-expand-sm bg-light navbar-light">
+                <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="/map">Map</a>
+                  </li>
+                  <li class="nav-item active">
+                    <a class="nav-link" href="/table">Table</a>
+                  </li>
+                </ul>
+              </nav>
+      </div>
+      <h2>Make a table based on the value of a drop down menu.</h2>
+
+      <select id="myselect" onchange="change_myselect(this.value)">
+        <option value="">Choose an option:</option>
+        <option value="customers">Customers</option>
+        <option value="products">Products</option>
+        <option value="suppliers">Suppliers</option>
+      </select>
+      
+      <p id="demo"></p>
+      
+      <script>
+      function change_myselect(sel) {
+        var obj, dbParam, xmlhttp, myObj, x, txt = "";
+        obj = { table: sel, limit: 20 };
+        dbParam = JSON.stringify(obj);
+        xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            myObj = JSON.parse(this.responseText);
+            txt += "<table border='1'>"
+            for (x in myObj) {
+              txt += "<tr><td>" + myObj[x].name + "</td></tr>";
+            }
+            txt += "</table>"    
+            document.getElementById("demo").innerHTML = txt;
+            }
+          };
+        xmlhttp.open("POST", "/table", true);
+        xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xmlhttp.send("x=" + dbParam);
+      }
+      </script>
+      
+      </body>
+      </html>

@@ -7,6 +7,13 @@ app = Flask(__name__)
 def hello():
     return render_template('index.html')
 
+@app.route('/map')
+def map():
+    return render_template('map.html')
+
+@app.route('/table')
+def table():
+    return render_template('table.html')
 
 @app.route('/data')
 def data():
