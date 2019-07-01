@@ -1,337 +1,123 @@
-
-// set up chart dimensions
+// Define SVG area dimensions
 var svgWidth = 1000;
 var svgHeight = 700;
 var margin = { top: 30, right: 40, bottom: 100, left: 100 };
 
-var width = svgWidth - margin.left - margin.right;
-var height = svgHeight - margin.top - margin.bottom;
+// Define dimensions of the chart area
+var chartWidth = svgWidth - margin.left - margin.right;
+var chartHeight = svgHeight - margin.top - margin.bottom;
 
-
-// create SVG wrapper
-
+// Select body, append SVG area to it, and set its dimensions
 var svg = d3.select(".chart")
-    .append("svg")
-    .attr("height", svgHeight)
-    .attr("width", svgWidth)
-    .append("g")
-    .attr("transform", `translate(${margin.left},${margin.top})`);
+  .append("svg")
+  .attr("width", svgWidth)
+  .attr("height", svgHeight);
 
-// ppend SVG group
-var chart = svg.append("g");
+// Append a group area, then set its margins
+var chartGroup = svg.append("g")
+  .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-d3.select(".chart").append("div").attr("class", "tooltip").style("opacity", 0);
+// Configure a parseTime function which will return a new Date object from a string
+var parseTime = d3.timeParse("%Y");
 
-url = "/data";
-d3.json(url, function (err, data) {
-    if (err) throw err;
+// Load data from forcepoints.csv
+url = "/annual_data";
+d3.json(url, function(error, forceData) {
 
-    // copy data into global dataset
-    dataset = data
+  // Throw an error if one occurs
+  if (error) throw error;
 
-    // initialize tooltip
-    var toolTip = d3.tip()
-        .attr("class", "tooltip")
-        // set neutral position
-        .offset([0, 50])
-        .html(function (data) {
-            var state = data.NAME;
-            return (`${data.NAME}<br>Homeless Population: ${data.homeless}<br>Median Income: $${data.median_income}<br>Poverty Rate: ${data.poverty_rate}%<br>Unemployment Rate: ${data.unemployment_rate}% `);
-        });
+  // Print the forceData
+  console.log(forceData);
 
-    // call tooltip
-    chart.call(toolTip);
+  // Format the date and cast the force value to a number
+  forceData.forEach(function(data) {
+    data.Year = parseTime(data.Year);
+    data.Homeless_Population = +data.Homeless_Population;
+    data.Budget_Dollars = +data.Budget_Dollars;
+  });
 
-    // define scale functions
-    var xScale = d3.scaleLinear().range([0, width]);
-    var yScale = d3.scaleLinear().range([height, 0]);
+  // Configure a time scale
+  // d3.extent returns the an array containing the min and max values for the property specified
+  var xTimeScale = d3.scaleTime()
+    .domain(d3.extent(forceData, data => data.Year))
+    .range([0, chartWidth]);
 
-    // define axis functions
-    var xAxis = d3.axisBottom().scale(xScale);
-    var yAxis = d3.axisLeft().scale(yScale);
+  // Configure a linear scale with a range between the chartHeight and 0
+  var yLinearScale1 = d3.scaleLinear()
+    .domain([0, d3.max(forceData, data => data.Homeless_Population)])
+    .range([chartHeight, 0]);
+  
+    var yLinearScale2 = d3.scaleLinear()
+    .domain([0, d3.max(forceData, data => data.Budget_Dollars)])
+    .range([chartHeight, 0]);
+  
+  // Create two new functions passing the scales in as arguments
+  // These will be used to create the chart's axes
+  var bottomAxis = d3.axisBottom(xTimeScale);
+  var leftAxis = d3.axisLeft(yLinearScale1);
+  var rightAxis = d3.axisLeft(yLinearScale2);
 
-    // variables to store min and max values
-    var xMin;
-    var xMax;
-    var yMin;
-    var yMax;
+  chartGroup.append("g").attr("transform", `translate(0, ${chartHeight})`).call(bottomAxis);
 
-    // identify min and max values from data
-    // assigns the values to the min and max variables
-    function findMinAndMaxX(dataColumnX) {
-        xMin = d3.min(dataset, function (d) { return d[dataColumnX] * 0.95 });
-        xMax = d3.max(dataset, function (d) { return d[dataColumnX] * 1.1 });
-    };
+  // Add leftAxis to the left side of the display
+  chartGroup.append("g").call(leftAxis);
 
-    function findMinAndMaxY(dataColumnY) {
-        yMin = d3.min(dataset, function (d) { return d[dataColumnY] * 0.8 });
-        yMax = d3.max(dataset, function (d) { return d[dataColumnY] * 1.1 });
-    };
+  // Add rightAxis to the right side of the display
+  chartGroup.append("g").attr("transform", `translate(${chartWidth}, 0)`).call(rightAxis);
 
-    // set default x-axis
-    var defaultAxisLabelX = "median_income"
+  // Configure a line function which will plot the x and y coordinates using our scales
+  var drawLine1 = d3.line()
+    .x(data => xTimeScale(data.Year))
+    .y(data => yLinearScale1(data.Homeless_Population));
 
-    // set default y-axis
-    var defaultAxisLabelY = "homeless_rate"
+  var drawLine2 = d3.line()
+    .x(data => xTimeScale(data.Year))
+    .y(data => yLinearScale2(data.Budget_Dollars));
+  
+   // Append a path for line1
+  chartGroup.append("path")
+    .data([forceData])
+    .attr("stroke", "black")
+    .attr("stroke-width", "3")
+    .attr("fill", "none")
+    .attr("d", drawLine1)
+    .classed("line", true);
 
-    // call the findMinAndMax() on the default X Axis
-    findMinAndMaxX(defaultAxisLabelX)
-    findMinAndMaxY(defaultAxisLabelY)
+  // Append a path for line2
+  chartGroup.append("path")
+    .data([forceData])
+    .attr("stroke", "green")
+    .attr("stroke-width", "3")
+    .attr("fill", "none")
+    .attr("d", drawLine2)
+    .classed("line", true);
 
-    // set the domain of the axes
-    xScale.domain([xMin, xMax]);
-    yScale.domain([yMin, yMax])
+  svg.append("circle").attr("cx",200).attr("cy",180).attr("r", 6).style("fill", "Black")
+  svg.append("circle").attr("cx",200).attr("cy",210).attr("r", 6).style("fill", "Green")
+  svg.append("text").attr("x", 220).attr("y", 180).text("Homeless Population").style("font-size", "15px").attr("alignment-baseline","middle")
+  svg.append("text").attr("x", 220).attr("y", 210).text("Annual Budget ($)").style("font-size", "15px").attr("alignment-baseline","middle")
 
-    // create chart
-    chart.selectAll("circle")
-        .data(dataset)
-        .enter()
-        .append("circle")
-        .attr("cx", function (d) {
-            return xScale(d[defaultAxisLabelX]);
-        })
-        .attr("cy", function (d) {
-            return yScale(d[defaultAxisLabelY]);
-        })
-        .attr("r", 13)
-        .attr("fill", "#4380BA")
-        .attr("opacity", 0.75)
-        // display tooltip on click
-        .on("mouseover", function (d) {
-            toolTip.show(d);
-        })
-        // hide tooltip on mouseout
-        .on("mouseout", function (d, i) {
-            toolTip.hide(d);
-        })
+}); 
 
-    // create state labels
-    chart.selectAll("text")
-        .data(dataset)
-        .enter()
-        .append("text")
-        .text(function (d) {
-            return d.STATE;
-        })
-        .attr("x", function (d) {
-            return xScale(d[defaultAxisLabelX]);
-        })
-        .attr("y", function (d) {
-            return yScale(d[defaultAxisLabelY]);
-        })
-        .attr("font-size", "12px")
-        .attr("text-anchor", "middle")
-        .attr("class","stateText")
-        .attr("fill", "white")
+//   // Append an SVG path and plot its points using the line function
+//   chartGroup.append("path")
+//     // The drawLine function returns the instructions for creating the line for forceData
+//     .attr("stroke", "black")
+//     .attr("stroke-width", "3")
+//     .attr("fill", "none")
+//     .attr("d", drawLine1(forceData))
+//     .classed("line", true);
 
-        // display tooltip on click
-        .on("mouseover", function (d) {
-            toolTip.show(d);
-        })
-        // hide tooltip on mouseout
-        .on("mouseout", function (d, i) {
-            toolTip.hide(d);
-        })
+//   // Append an SVG group element to the chartGroup, create the left axis inside of it
+//   chartGroup.append("g")
+//     .classed("axis", true)
+//     .call(leftAxis);
 
-
-    // create x-axis
-    chart.append("g")
-        .attr("class", "x-axis")
-        .attr("transform", `translate(0,${height})`)
-        .call(xAxis);
-
-    // create y-axis
-    chart.append("g")
-        .attr("class", "y-axis")
-        .call(yAxis)
-
-
-    // Append axes titles
-    // add main x-axis title
-    chart.append("text")
-        .attr("transform", `translate(${width - 40},${height - 5})`)
-        .attr("class", "axis-text-main")
-        .text("Economic Demographics")
-
-    chart.append("text")
-        .attr("transform", `translate(15,60 )rotate(270)`)
-        .attr("class", "axis-text-main")
-        .text("Census Volume")
-
-    // add x-axis titles
-    chart.append("text")
-        .attr("transform", `translate(${width / 2},${height + 40})`)
-        // This axis label is active by default
-        .attr("class", "axis-text-x active")
-        .attr("data-axis-name", "median_income")
-        .text("Median Income ($)");
-
-    chart.append("text")
-        .attr("transform", `translate(${width / 2},${height + 60})`)
-        .attr("class", "axis-text-x inactive")
-        .attr("data-axis-name", "poverty_rate")
-        .text("Poverty Rate (%)");
-
-    chart.append("text")
-        .attr("transform", `translate(${width / 2},${height + 80})`)
-        .attr("class", "axis-text-x inactive")
-        .attr("data-axis-name", "unemployment_rate")
-        .text("Unemployment Rate (%)");
-
-    // add y-axis titles 
-    chart.append("text")
-        .attr("transform", `translate(-45,${height / 2})rotate(270)`)
-        .attr("class", "axis-text-y active")
-        .attr("data-axis-name", "homeless_rate")
-        .text("Homeless Rate (%)");
-    
-    chart.append("text")
-        .attr("transform", `translate(-65,${height / 2})rotate(270)`)
-        .attr("class", "axis-text-y inactive")
-        .attr("data-axis-name", "homeless")
-        .text("Homeless Volume");
-
-
-    // change the x axis's status to active when clicked and change other axis titles to inactive
-    function labelChangeX(clickedAxis) {
-        d3.selectAll(".axis-text-x")
-            .filter(".active")
-            .classed("active", false)
-            .classed("inactive", true);
-
-        clickedAxis.classed("inactive", false).classed("active", true);
-    }
-
-    // change the y axis's status to active when clicked and change other axis titles to inactive
-    function labelChangeY(clickedAxis) {
-        d3.selectAll(".axis-text-y")
-            .filter(".active")
-            .classed("active", false)
-            .classed("inactive", true);
-
-        clickedAxis.classed("inactive", false).classed("active", true);
-    }
-
-    // on click events for the x-axis
-    d3.selectAll(".axis-text-x").on("click", function () {
-
-        // assign the variable to the current axis
-        var clickedSelection = d3.select(this);
-        var isClickedSelectionInactive = clickedSelection.classed("inactive");
-        console.log("this axis is inactive", isClickedSelectionInactive)
-        var clickedAxis = clickedSelection.attr("data-axis-name");
-        console.log("Now Showing: ", clickedAxis);
-
-        if (isClickedSelectionInactive) {
-            currentAxisLabelX = clickedAxis;
-
-            findMinAndMaxX(currentAxisLabelX);
-
-            xScale.domain([xMin, xMax]);
-
-            // create x-axis
-            svg.select(".x-axis")
-                .transition()
-                .duration(1000)
-                .ease(d3.easeLinear)
-                .call(xAxis);
-
-            d3.selectAll("circle")
-                .transition()
-                .duration(1000)
-                .ease(d3.easeLinear)
-                .on("start", function () {
-                    d3.select(this)
-                        .attr("opacity", 0.50)
-                        .attr("r", 17)
-
-                })
-                .attr("cx", function (d) {
-                    return xScale(d[currentAxisLabelX]);
-                })
-                .on("end", function () {
-                    d3.select(this)
-                        .transition()
-                        .duration(500)
-                        .attr("r", 13)
-                        .attr("fill", "#4380BA")
-                        .attr("opacity", 0.75);
-                })
-
-            d3.selectAll(".stateText")
-                    .transition()
-                    .duration(1000)
-                    .ease(d3.easeLinear)
-                    .attr("x", function (d) {
-                        return xScale(d[currentAxisLabelX]);
-                    })
-                    
-            
-
-            labelChangeX(clickedSelection);
-        }
-    });
-
-    // On click events for the y-axis
-    d3.selectAll(".axis-text-y").on("click", function () {
-
-        // assign the variable to the current axis
-        var clickedSelection = d3.select(this);
-        var isClickedSelectionInactive = clickedSelection.classed("inactive");
-        console.log("this axis is inactive", isClickedSelectionInactive)
-        var clickedAxis = clickedSelection.attr("data-axis-name");
-        console.log("current axis: ", clickedAxis);
-
-        if (isClickedSelectionInactive) {
-            currentAxisLabelY = clickedAxis;
-
-            findMinAndMaxY(currentAxisLabelY);
-
-            yScale.domain([yMin, yMax]);
-
-            // create y-axis
-            svg.select(".y-axis")
-                .transition()
-                .duration(1000)
-                .ease(d3.easeLinear)
-                .call(yAxis);
-
-            d3.selectAll("circle")
-                .transition()
-                .duration(1000)
-                .ease(d3.easeLinear)
-                .on("start", function () {
-                    d3.select(this)
-                        .attr("opacity", 0.50)
-                        .attr("r", 17)
-
-                })
-                .attr("cy", function (data) {
-                    return yScale(data[currentAxisLabelY]);
-                })
-                .on("end", function () {
-                    d3.select(this)
-                        .transition()
-                        .duration(500)
-                        .attr("r", 13)
-                        .attr("fill", "#4380BA")
-                        .attr("opacity", 0.75);
-                })
-
-            d3.selectAll(".stateText")
-                .transition()
-                .duration(1000)
-                .ease(d3.easeLinear)
-                .attr("y", function (d) {
-                    return yScale(d[currentAxisLabelY]);
-                })
-
-            labelChangeY(clickedSelection);
-
-        }
-
-    });
-
-});
-
-
+//   // Append an SVG group element to the chartGroup, create the bottom axis inside of it
+//   // Translate the bottom axis to the bottom of the page
+//   chartGroup.append("g")
+//     .classed("axis", true)
+//     .attr("transform", `translate(0, ${chartHeight})`)
+//     .call(bottomAxis);
+// });
