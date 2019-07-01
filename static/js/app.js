@@ -11,25 +11,22 @@ var chartHeight = svgHeight - margin.top - margin.bottom;
 var svg = d3.select(".chart")
   .append("svg")
   .attr("width", svgWidth)
-  .attr("height", svgHeight);
-  
+  .attr("height", svgHeight);  
 
 // Append a group area, then set its margins
 var chartGroup = svg.append("g").attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-d3.select(".chart").append("div").attr("class", "tooltip").style("opacity", 0);
-
 // Configure a parseTime function which will return a new Date object from a string
 var parseTime = d3.timeParse("%Y");
 
-// Load data from forcepoints.csv
+// Load json data from Flask route
 url = "/annual_data";
 d3.json(url, function(error, dataset) {
 
   // Throw an error if one occurs
   if (error) throw error;
 
-  // Print the forceData
+  // Print the dataset
   console.log(dataset);
 
   // Format the date and cast the force value to a number
@@ -68,7 +65,7 @@ d3.json(url, function(error, dataset) {
   // Add rightAxis to the right side of the display
   chartGroup.append("g").attr("transform", `translate(${chartWidth}, 0)`).call(rightAxis);
 
-  // Configure a line function which will plot the x and y coordinates using our scales
+  // Configure line functions which will plot the x and y coordinates using our scales
   var drawLine1 = d3.line()
     .x(data => xTimeScale(data.Year))
     .y(data => yLinearScale1(data.Homeless_Population));
@@ -94,7 +91,8 @@ d3.json(url, function(error, dataset) {
     .attr("fill", "none")
     .attr("d", drawLine2)
     .classed("line", true);
-
+  
+  // Append a legend to chart
   svg.append("circle").attr("cx",200).attr("cy",180).attr("r", 6).style("fill", "Black")
   svg.append("circle").attr("cx",200).attr("cy",210).attr("r", 6).style("fill", "Green")
   svg.append("text").attr("x", 220).attr("y", 180).text("Homeless Population").style("font-size", "15px").attr("alignment-baseline","middle")
