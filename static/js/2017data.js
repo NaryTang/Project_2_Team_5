@@ -1,7 +1,7 @@
 
 // set up chart dimensions
-var svgWidth = 1000;
-var svgHeight = 700;
+var svgWidth = 900;
+var svgHeight = 600;
 var margin = { top: 30, right: 40, bottom: 100, left: 100 };
 
 var width = svgWidth - margin.left - margin.right;
@@ -17,7 +17,7 @@ var svg = d3.select(".chart")
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-// ppend SVG group
+// append SVG group
 var chart = svg.append("g");
 
 d3.select(".chart").append("div").attr("class", "tooltip").style("opacity", 0);
